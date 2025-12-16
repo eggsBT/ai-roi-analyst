@@ -1,0 +1,5 @@
+{
+  "name": "AI ROI Analyst",
+  "description": "A financial modeling tool that uses Gemini to calculate and project the quantitative financial impact and ROI of AI integrations.",
+  "requestFramePermissions": []
+}
