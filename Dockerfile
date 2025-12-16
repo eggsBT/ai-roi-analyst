@@ -13,7 +13,7 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy our custom config from Step 2
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy the React build output
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Cloud Run requires port 8080
 EXPOSE 8080
