@@ -27,43 +27,43 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-12">
-      {/* Navbar/Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-[#FDFCF9] text-amber-950 pb-12 font-sans animate-fade-in">
+      {/* Navbar/Header with EBT LLC branding colors */}
+      <header className="bg-[#FAF8F5] border-b border-[#EAE6DF] sticky top-0 z-10 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
              <Logo className="w-10 h-10 shadow-sm rounded-xl" />
-             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
-               AI ROI Analyst
+             <h1 className="text-base sm:text-lg font-extrabold text-amber-950 uppercase tracking-wider">
+               AI ROI Analyst <span className="text-[#D97706] text-xs font-bold font-mono ml-1">EBT LLC Edition</span>
              </h1>
           </div>
-          <div className="text-xs font-medium px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
-            Powered by Gemini
+          <div className="text-xs font-bold px-3 py-1 bg-[#FEF3C7] text-[#92400E] rounded-full border border-[#FDE68A]">
+            ✨ Gemini 3.5 Enhanced
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Artifact A: Instruction Box */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-indigo-100 mb-8 animate-fade-in">
+        {/* Instruction Box themed for EBT */}
+        <div className="bg-[#FAF8F5] p-6 rounded-2xl shadow-sm border border-[#EAE6DF] mb-8 animate-fade-in animate-duration-500" id="ebt_guidance">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-indigo-50 rounded-lg hidden sm:block shrink-0">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <div className="p-3 bg-[#FEF3C7] rounded-xl hidden sm:block shrink-0 animate-pulse">
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#D97706]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M13 10V3L4 14h7v7l9-11h-7z" />
                </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800 mb-2">🎯 AI INVESTMENT ANALYSIS & JUSTIFICATION</h2>
-              <p className="text-slate-600 text-sm mb-4 leading-relaxed">
-                Welcome to the AiROI Analyst, your executive tool for quantifying the business case for AI adoption. This analyst uses the Gemini model, acting as a Senior Financial Consultant, to generate a comprehensive ROI report, factoring in both hard financial metrics (Time Savings, Revenue Uplift) and qualitative strategic impact (Agility, Risk Mitigation).
+              <h2 className="text-xs font-bold text-amber-950 uppercase tracking-widest mb-1">🎯 AI Investment Justification Deck</h2>
+              <p className="text-[#645C51] text-xs mb-3.5 leading-relaxed">
+                Quantify the technical, labor-saving, and operational efficiency gains for your upcoming AI initiatives. The Gemini 3 model family acts as an Executive Controller to compile detailed financial spreadsheets and layout-ready structured slides.
               </p>
-              <div className="bg-indigo-50/50 rounded-lg p-4 text-sm border border-indigo-100">
-                 <h3 className="font-semibold text-indigo-900 mb-2">Guidance:</h3>
-                 <ul className="list-disc list-inside space-y-1 text-slate-700 ml-1">
-                   <li><strong className="text-indigo-800">Select an AI Use Case:</strong> Choose the specific business operation your AI solution is targeting.</li>
-                   <li><strong className="text-indigo-800">Input Metrics:</strong> Provide realistic estimates for the 6 core parameters. Use the 1-10 slider scores to quantify the Soft ROI.</li>
-                   <li><strong className="text-indigo-800">Generate & Present:</strong> Use the resulting Executive Summary and Slide Deck Recommendations to build a compelling justification.</li>
+              <div className="bg-[#FCFAF7] rounded-xl p-4 text-xs border border-[#F1EFEA]">
+                 <h3 className="font-bold text-[#D97706] mb-2 uppercase tracking-wide">Optimization Steps:</h3>
+                 <ul className="list-disc list-inside space-y-1.5 text-[#7A7165] ml-1">
+                   <li><strong className="text-amber-950">Option A: Smart-Fill Notes:</strong> Use Gemini 3 power inside the input form to parse conversational messages on the fly and auto-fill metrics.</li>
+                   <li><strong className="text-amber-950">Option B: Structured Entry:</strong> Select the targeted operational profile, adjusting weekly savings and OpEx indicators manually.</li>
+                   <li><strong className="text-amber-950">Compile Brief:</strong> Validate the interactive Waterfall graphs and export slide decks instantly to local PowerPoint (`.pptx`).</li>
                  </ul>
               </div>
             </div>
@@ -97,33 +97,33 @@ const App: React.FC = () => {
           {/* Right Column: Results */}
           <div className="lg:col-span-8">
             {status === FetchStatus.IDLE && (
-              <div className="h-full flex flex-col items-center justify-center min-h-[400px] text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400">
+              <div className="h-full flex flex-col items-center justify-center min-h-[400px] text-center p-8 border border-dashed border-[#DFD8CE] rounded-2xl bg-[#FCFAF7]">
+                <div className="w-16 h-16 bg-[#FAF8F5] rounded-full border border-[#EAE6DF] flex items-center justify-center mb-4 text-[#A0968D]">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
-                <h3 className="text-lg font-medium text-slate-600">No Data Calculated</h3>
-                <p className="text-slate-400 max-w-sm mt-2">Enter your project parameters on the left to generate a detailed financial profitability report.</p>
+                <h3 className="text-sm font-bold text-amber-950 uppercase tracking-widest">No Model Rendered</h3>
+                <p className="text-[#7A7165] text-xs max-w-xs mt-2 leading-relaxed">Enter unstructured notes or key in your custom parameters on the left to activate the EBT ROI analyzer.</p>
               </div>
             )}
 
             {status === FetchStatus.LOADING && (
               <div className="h-full flex flex-col items-center justify-center min-h-[400px] space-y-4">
-                 <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
-                 <p className="text-emerald-700 font-medium animate-pulse">Consulting the AI Financial Analyst...</p>
+                 <div className="w-10 h-10 border-4 border-[#FEF3C7] border-t-[#D97706] rounded-full animate-spin"></div>
+                 <p className="text-[#D97706] font-bold text-xs uppercase tracking-widest animate-pulse">EBT AI model executing calculations...</p>
               </div>
             )}
 
             {status === FetchStatus.ERROR && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-800">
-                <p className="font-semibold">Error</p>
-                <p className="text-sm mt-1">{error}</p>
+              <div className="bg-[#FFF1F2] border border-[#FCE7F3] rounded-2xl p-6 text-center text-[#BE185D]">
+                <p className="font-bold text-sm uppercase tracking-wider">Analysis Denied</p>
+                <p className="text-xs mt-1.5 leading-relaxed">{error}</p>
                 <button 
                   onClick={() => setStatus(FetchStatus.IDLE)}
-                  className="mt-4 px-4 py-2 bg-white border border-red-200 text-red-600 text-sm rounded hover:bg-red-50 transition-colors"
+                  className="mt-4 px-4 py-2 bg-white border border-[#FCE7F3] text-[#BE185D] text-xs font-semibold rounded-lg hover:bg-[#FFF1F2] transition-colors"
                 >
-                  Try Again
+                  Adjust Parameters
                 </button>
               </div>
             )}
@@ -134,19 +134,18 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        {/* Footer / How this works */}
-        <div className="mt-16 border-t border-slate-200 pt-8">
-           <div className="max-w-3xl mx-auto bg-blue-50/50 p-6 rounded-xl border border-blue-100 text-center">
-              <h4 className="text-blue-900 font-semibold text-sm mb-2 uppercase tracking-wide">How this works</h4>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                This tool uses the Gemini 2.5 Flash model acting as a financial analyst. 
-                It takes your raw inputs and calculates the annual impact, ROI, and break-even point 
-                to justify AI automation investments.
+        {/* Footer */}
+        <div className="mt-16 border-t border-[#DFD8CE] pt-8">
+           <div className="max-w-3xl mx-auto bg-[#FAF8F5] p-6 rounded-2xl border border-[#EAE6DF] text-center">
+              <h4 className="text-amber-950 font-bold text-xs uppercase tracking-widest mb-1.5">Model Engine Architecture</h4>
+              <p className="text-[#645C51] text-xs leading-relaxed">
+                This full-stack engine runs on the Gemini 3 model family (with Gemini 3.5 Flash and Gemini 3.5 Pro), serving client-side inputs alongside secure backend telemetry. Live results utilize exact mathematical formula validation to prevent financial hallucinations.
               </p>
            </div>
-           <p className="text-center text-xs text-slate-400 mt-6">
-             © {new Date().getFullYear()} AI ROI Analyst. All calculations are estimates based on provided inputs.
-           </p>
+           <div className="text-center text-[10px] text-[#A0968D] mt-6 space-y-1">
+             <p>© {new Date().getFullYear()} Eggs Benedict Tech - EBT LLC. All rights reserved.</p>
+             <p>Eggs Benedict branding and styling inspired by eggsbenedict.tech</p>
+           </div>
         </div>
       </main>
     </div>

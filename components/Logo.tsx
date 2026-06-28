@@ -14,21 +14,21 @@ const Logo: React.FC<LogoProps> = ({ className = "w-10 h-10" }) => {
     >
       <defs>
         <linearGradient id="paint0_linear" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#10B981" /> {/* Emerald-500 */}
-          <stop offset="1" stopColor="#0F766E" /> {/* Teal-700 */}
+          <stop stopColor="#2E2A27" /> {/* Deep Toasted Charcoal */}
+          <stop offset="1" stopColor="#1E1C1A" /> {/* Roasted Black */}
         </linearGradient>
       </defs>
       <g transform="matrix(-1 0 0 1 48 0)">
         <rect width="48" height="48" rx="12" fill="url(#paint0_linear)" />
-        {/* Dollar Sign */}
+        {/* Dollar Sign as Yolk Gold */}
         <path 
           d="M24 10V38M16 16.5C16 16.5 19 14 24 14C29 14 31 16 31 19.5C31 23 28 25 24 26C20 27 17 29 17 32.5C17 36 20 38 24 38C29 38 32 35.5 32 35.5" 
-          stroke="white" 
+          stroke="#F59E0B" 
           strokeWidth="4" 
           strokeLinecap="round" 
           strokeLinejoin="round" 
         />
-        {/* Lightning Bolt Accent for AI/Flash */}
+        {/* Lightning Bolt Accent for AI/Flash (Cream Gold) */}
         <path 
           d="M34 10L28 22H33L27 34" 
           stroke="#FCD34D" 
