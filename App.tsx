@@ -87,7 +87,7 @@ const App: React.FC = () => {
                     Executive Summary
                   </h4>
                   <p className="text-slate-800 text-base leading-relaxed italic">
-                    "{report.executive_summary}"
+                    "{report.narrative.executive_summary}"
                   </p>
                 </div>
                )}

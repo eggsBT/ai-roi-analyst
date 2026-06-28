@@ -1,52 +1,48 @@
-// types.ts (For reference)
+// types.ts
+
+import { ComputedMetrics } from "./services/financials";
 
 export interface FinancialInputs {
-  aiUseCase: string; // New AI Use Case field
-  weeklyTimeSaved: number; // hrs
+  aiUseCase: string;
+  weeklyTimeSaved: number; // hrs/week
   avgLaborCost: number; // usd/hr
-  implementationCost: number; // usd (One-time)
-  operationalCost: number; // usd (Annual)
-  // --- New Hard Metric ---
-  projectedRevenueUplift: number; // usd
-  // --- New Soft Metrics ---
+  implementationCost: number; // usd (one-time)
+  operationalCost: number; // usd (annual)
+  projectedRevenueUplift: number; // usd (annual)
   riskMitigationScore: number; // 1-10
   strategicAgilityScore: number; // 1-10
 }
 
-export interface FinancialReport {
+/**
+ * The narrative fields the LLM is responsible for. It receives the
+ * already-computed metrics and writes prose/slide content around them —
+ * it does NOT produce any of the numbers.
+ */
+export interface NarrativeContent {
   project_title: string;
-  inputs_used: {
-    ai_use_case: string;
-    weekly_time_saved_hours: number;
-    avg_labor_cost_per_hour_usd: number;
-    one_time_implementation_cost_usd: number;
-    operational_cost_per_year_usd: number;
-    projected_revenue_uplift_usd: number;
-    risk_mitigation_score_1_to_10: number;
-    strategic_agility_score_1_to_10: number;
-  };
-  metrics: {
-    annual_cost_savings_usd: number; // Savings from time only
-    projected_revenue_uplift_usd: number; // Revenue increase
-    total_annual_hard_savings_usd: number; // Combined Gross Savings
-    roi_percentage: number;
-    break_even_point_months: number;
-    soft_roi_summary: string;
-    slide_visual_recommendation: string[]; // New list for presentation
-    // --- New PPTX Data Structure ---
-    pptx_data_structure: {
-        theme_colors: { green: string; blue: string; gold: string };
-        slide_title: string;
-        key_metrics: { label: string; value: string; color: string }[];
-        summary_bullet_points: string[];
-    };
-  };
   executive_summary: string;
+  soft_roi_summary: string;
+  /** 3-5 talking points / visual ideas for a presentation slide. */
+  slide_visual_recommendation: string[];
+  /** Title for the exported executive slide. */
+  slide_title: string;
+  /** Bullet points for the exported slide. */
+  summary_bullet_points: string[];
+}
+
+/**
+ * Assembled, authoritative report returned by the server to the client.
+ * `inputs` and `metrics` are code-owned; `narrative` is model-owned.
+ */
+export interface FinancialReport {
+  inputs: FinancialInputs;
+  metrics: ComputedMetrics;
+  narrative: NarrativeContent;
 }
 
 export enum FetchStatus {
-  IDLE = 'idle',
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  ERROR = 'error',
+  IDLE = "idle",
+  LOADING = "loading",
+  SUCCESS = "success",
+  ERROR = "error",
 }

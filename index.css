@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: #f8fafc;
+}
+
+/* Lightweight entrance animation used throughout the UI (previously a no-op
+   under the Tailwind CDN). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-duration-500 {
+  animation-duration: 0.5s;
+}

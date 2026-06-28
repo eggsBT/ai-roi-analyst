@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FinancialInputs, FetchStatus } from '../types';
+import { extractInputsFromText } from '../services/geminiService';
 
 interface InputFormProps {
   onSubmit: (inputs: FinancialInputs) => void;
@@ -184,20 +185,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, status }) => {
     setExtractionFeedback(null);
 
     try {
-      const response = await fetch("/api/extract", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: proposalNotes }),
-      });
+      const extracted = await extractInputsFromText(proposalNotes);
 
-      if (!response.ok) {
-        throw new Error("Failed to extract metrics from notes. Ensure the backend server is running.");
-      }
-
-      const extracted = await response.json();
-      
       // Update form values with animation-friendly reactive states
       if (extracted.aiUseCase) setAiUseCase(extracted.aiUseCase);
       if (extracted.weeklyTimeSaved !== undefined) setWeeklyTimeSaved(String(extracted.weeklyTimeSaved));

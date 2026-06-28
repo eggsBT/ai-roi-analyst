@@ -1,46 +1,21 @@
 import { FinancialInputs, FinancialReport } from "../types";
 
-export const generateProfitabilityReport = async (inputs: FinancialInputs): Promise<FinancialReport> => {
-  try {
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ inputs }),
-    });
+async function postJson<T>(url: string, body: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Server responded with status ${response.status}`);
-    }
-
-    return await response.json() as FinancialReport;
-  } catch (error) {
-    console.error("Error generating report via server API:", error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `Server responded with status ${response.status}`);
   }
-};
+  return (await response.json()) as T;
+}
 
-export const extractInputsFromText = async (text: string): Promise<FinancialInputs> => {
-  try {
-    const response = await fetch("/api/extract", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
-    });
+export const generateProfitabilityReport = (inputs: FinancialInputs): Promise<FinancialReport> =>
+  postJson<FinancialReport>("/api/analyze", { inputs });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Server responded with status ${response.status}`);
-    }
-
-    return await response.json() as FinancialInputs;
-  } catch (error) {
-    console.error("Error extracting parameters:", error);
-    throw error;
-  }
-};
-
+export const extractInputsFromText = (text: string): Promise<FinancialInputs> =>
+  postJson<FinancialInputs>("/api/extract", { text });
