@@ -3,16 +3,60 @@
 import React from 'react';
 import { FinancialReport } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import PptxGenJS from 'pptxgenjs';
 import { formatCurrency, formatRoiPercent, formatBreakEven, THEME_COLORS } from '../services/financials';
 
 interface ResultsDashboardProps {
   report: FinancialReport;
 }
 
+/**
+ * A metric card whose breakdown overlay is reachable by hover, keyboard
+ * (focus / Enter / Space), and touch (tap). The hover-only version was
+ * invisible to keyboard and touch users.
+ */
+const MetricCard: React.FC<{
+  className?: string;
+  front: React.ReactNode;
+  overlayTitle: string;
+  overlay: React.ReactNode;
+}> = ({ className = '', front, overlayTitle, overlay }) => {
+  const [open, setOpen] = React.useState(false);
+  const toggle = () => setOpen((o) => !o);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      aria-label={`${overlayTitle} — show details`}
+      onClick={toggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+        if (e.key === 'Escape') setOpen(false);
+      }}
+      onBlur={() => setOpen(false)}
+      className={`group relative p-6 rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden cursor-pointer hover:shadow-md transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-[#D97706] ${className}`}
+    >
+      <div className="relative z-0">{front}</div>
+      <div
+        className={`absolute inset-0 bg-[#2E2A27]/95 backdrop-blur-sm p-5 flex flex-col justify-center transition-opacity duration-300 z-10 text-white group-hover:opacity-100 ${
+          open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <p className="text-[10px] font-bold uppercase text-[#A0968D] mb-3 tracking-wider border-b border-[#47403B] pb-2">{overlayTitle}</p>
+        {overlay}
+      </div>
+    </div>
+  );
+};
+
 const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ report }) => {
   const { inputs, metrics, narrative } = report;
   const [exportStatus, setExportStatus] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [exporting, setExporting] = React.useState(false);
 
   const roiPositive = (metrics.roi ?? 0) >= 0;
 
@@ -22,8 +66,14 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ report }) => {
     { name: 'Year 1 Value', implementation: 0, operational: 0, savings: metrics.annualLaborSavings, revenue: metrics.revenueUplift },
   ];
 
-  const handleExportSlide = () => {
+  const handleExportSlide = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportStatus(null);
     try {
+      // Lazy-load pptxgenjs (~heavy) only when the user actually exports,
+      // keeping it out of the initial bundle.
+      const PptxGenJS = (await import('pptxgenjs')).default;
       const pres = new PptxGenJS();
       const slide = pres.addSlide();
 
@@ -66,13 +116,22 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ report }) => {
         x: 0.5, y: 5.2, fontSize: 10, color: '94A3B8', align: 'center',
       });
 
-      pres.writeFile({ fileName: `Executive_ROI_Brief_${new Date().toISOString().split('T')[0]}.pptx` });
+      await pres.writeFile({ fileName: `Executive_ROI_Brief_${new Date().toISOString().split('T')[0]}.pptx` });
       setExportStatus({ type: 'success', text: '🎉 PowerPoint file successfully generated and downloaded.' });
     } catch (e: any) {
       console.error('PPTX Generation Error', e);
       setExportStatus({ type: 'error', text: e.message || 'Failed to compile PowerPoint deck.' });
+    } finally {
+      setExporting(false);
     }
   };
+
+  const row = (label: string, value: string, valueClass: string) => (
+    <div className="flex justify-between items-center text-xs">
+      <span className="text-[#D5CFC9]">{label}</span>
+      <span className={`font-mono ${valueClass}`}>{value}</span>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -86,93 +145,75 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ report }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* ROI Card */}
-        <div className="group relative bg-[#FFFDF5] p-6 rounded-2xl shadow-sm border border-[#FDE68A] flex flex-col justify-between overflow-hidden cursor-help hover:shadow-md transition-shadow">
-          <div className="relative z-0">
-            <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Total ROI</p>
-            <h3 className={`text-4xl font-black mt-2 ${roiPositive ? 'text-[#D97706]' : 'text-[#E11D48]'}`}>
-              {formatRoiPercent(metrics.roi, 2)}
-            </h3>
-          </div>
-          <p className="text-[11px] text-[#7A7165] mt-4 relative z-0">
-            {metrics.roi === null ? 'No implementation cost provided' : 'Year 1 Return on Investment'}
-          </p>
-
-          <div className="absolute inset-0 bg-[#2E2A27]/95 backdrop-blur-sm p-5 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white">
-            <p className="text-[10px] font-bold uppercase text-[#A0968D] mb-3 tracking-wider border-b border-[#47403B] pb-2">ROI Breakdown</p>
+        <MetricCard
+          className="bg-[#FFFDF5] border border-[#FDE68A]"
+          overlayTitle="ROI Breakdown"
+          front={
+            <>
+              <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Total ROI</p>
+              <h3 className={`text-4xl font-black mt-2 ${roiPositive ? 'text-[#D97706]' : 'text-[#E11D48]'}`}>{formatRoiPercent(metrics.roi, 2)}</h3>
+              <p className="text-[11px] text-[#7A7165] mt-4">{metrics.roi === null ? 'No implementation cost provided' : 'Year 1 Return on Investment'}</p>
+            </>
+          }
+          overlay={
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[#D5CFC9]">Annual Net Benefit</span>
-                <span className={`font-mono font-medium ${metrics.netBenefit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(metrics.netBenefit)}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-[#D5CFC9]">Implement. Cost</span>
-                <span className="font-mono text-red-400">-{formatCurrency(metrics.implementationCost)}</span>
-              </div>
+              {row('Annual Net Benefit', formatCurrency(metrics.netBenefit), metrics.netBenefit >= 0 ? 'text-emerald-400 font-medium' : 'text-red-400 font-medium')}
+              {row('Implement. Cost', `-${formatCurrency(metrics.implementationCost)}`, 'text-red-400')}
               <div className="h-px bg-[#47403B] my-1 opacity-50"></div>
               <div className="flex justify-between items-center text-xs font-bold">
                 <span className="text-[#FCFAF7]">Net Profit (Yr 1)</span>
                 <span className={`font-mono ${metrics.netProfitYear1 >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(metrics.netProfitYear1)}</span>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Break Even Card */}
-        <div className="group relative bg-[#FCFAF7] p-6 rounded-2xl shadow-sm border border-[#EAE6DF] flex flex-col justify-between overflow-hidden cursor-help hover:shadow-md transition-shadow">
-          <div className="relative z-0">
-            <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Break-Even Point</p>
-            <h3 className="text-4xl font-black text-blue-600 mt-2">
-              {formatBreakEven(metrics.breakEvenMonths)}
-              {metrics.breakEvenMonths !== null && <span className="text-lg text-[#7A7165] font-normal ml-1">months</span>}
-            </h3>
-          </div>
-          <p className="text-[11px] text-[#7A7165] mt-4 relative z-0">
-            {metrics.breakEvenMonths === null ? 'Net benefit does not recover the investment' : 'Time to recover implementation costs'}
-          </p>
-
-          <div className="absolute inset-0 bg-[#2E2A27]/95 backdrop-blur-sm p-5 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white">
-            <p className="text-[10px] font-bold uppercase text-[#A0968D] mb-3 tracking-wider border-b border-[#47403B] pb-2">Time to Value</p>
+        <MetricCard
+          className="bg-[#FCFAF7] border border-[#EAE6DF]"
+          overlayTitle="Time to Value"
+          front={
+            <>
+              <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Break-Even Point</p>
+              <h3 className="text-4xl font-black text-blue-600 mt-2">
+                {formatBreakEven(metrics.breakEvenMonths)}
+                {metrics.breakEvenMonths !== null && <span className="text-lg text-[#7A7165] font-normal ml-1">months</span>}
+              </h3>
+              <p className="text-[11px] text-[#7A7165] mt-4">{metrics.breakEvenMonths === null ? 'Net benefit does not recover the investment' : 'Time to recover implementation costs'}</p>
+            </>
+          }
+          overlay={
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-[#D5CFC9]">Investment</span>
-                <span className="font-mono text-white">{formatCurrency(metrics.implementationCost)}</span>
-              </div>
+              {row('Investment', formatCurrency(metrics.implementationCost), 'text-white')}
               <div className="flex justify-center my-1 text-[#8C8479] text-[10px] italic">divided by</div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#D5CFC9]">Monthly Net Benefit</span>
-                <span className={`font-mono ${metrics.monthlyNetBenefit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(metrics.monthlyNetBenefit)}</span>
-              </div>
+              {row('Monthly Net Benefit', formatCurrency(metrics.monthlyNetBenefit), metrics.monthlyNetBenefit >= 0 ? 'text-emerald-400' : 'text-red-400')}
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Gross Annual Benefit Card */}
-        <div className="group relative bg-[#FCFAF7] p-6 rounded-2xl shadow-sm border border-[#EAE6DF] flex flex-col justify-between overflow-hidden cursor-help hover:shadow-md transition-shadow">
-          <div className="relative z-0">
-            <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Gross Annual Benefit</p>
-            <h3 className="text-4xl font-black text-emerald-600 mt-2">{formatCurrency(metrics.grossBenefit)}</h3>
-          </div>
-          <p className="text-[11px] text-[#7A7165] mt-4 relative z-0">Labor Savings + Revenue Uplift</p>
-
-          <div className="absolute inset-0 bg-[#2E2A27]/95 backdrop-blur-sm p-5 flex flex-col justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-white">
-            <p className="text-[10px] font-bold uppercase text-[#A0968D] mb-3 tracking-wider border-b border-[#47403B] pb-2">Benefit Components</p>
+        <MetricCard
+          className="bg-[#FCFAF7] border border-[#EAE6DF]"
+          overlayTitle="Benefit Components"
+          front={
+            <>
+              <p className="text-xs font-bold text-[#A0968D] uppercase tracking-wider">Gross Annual Benefit</p>
+              <h3 className="text-4xl font-black text-emerald-600 mt-2">{formatCurrency(metrics.grossBenefit)}</h3>
+              <p className="text-[11px] text-[#7A7165] mt-4">Labor Savings + Revenue Uplift</p>
+            </>
+          }
+          overlay={
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-[#D5CFC9]">Labor Savings</span>
-                <span className="font-mono text-emerald-400">{formatCurrency(metrics.annualLaborSavings)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#D5CFC9]">Revenue Uplift</span>
-                <span className="font-mono text-emerald-400">{formatCurrency(metrics.revenueUplift)}</span>
-              </div>
+              {row('Labor Savings', formatCurrency(metrics.annualLaborSavings), 'text-emerald-400')}
+              {row('Revenue Uplift', formatCurrency(metrics.revenueUplift), 'text-emerald-400')}
               <div className="h-px bg-[#47403B] my-1 opacity-50"></div>
               <div className="flex justify-between items-center font-bold">
                 <span className="text-[#FCFAF7]">Total Gross</span>
                 <span className="font-mono text-emerald-400">{formatCurrency(metrics.grossBenefit)}</span>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -229,11 +270,27 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ report }) => {
                 </svg>
                 Slide Recommendation Plan
               </h3>
-              <button onClick={handleExportSlide} className="text-xs bg-[#D97706] hover:bg-[#C26500] text-white px-3.5 py-1.5 rounded-xl transition-all shadow-sm font-bold active:scale-95 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export PPTX
+              <button
+                onClick={handleExportSlide}
+                disabled={exporting}
+                className="text-xs bg-[#D97706] hover:bg-[#C26500] disabled:opacity-60 disabled:cursor-not-allowed text-white px-3.5 py-1.5 rounded-xl transition-all shadow-sm font-bold active:scale-95 flex items-center gap-1.5"
+              >
+                {exporting ? (
+                  <>
+                    <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Building deck…
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export PPTX
+                  </>
+                )}
               </button>
             </div>
             <ul className="space-y-2.5">
